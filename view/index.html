@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>书城首页</title>
+<link type="text/css" rel="stylesheet" href="/static/css/style.css" >
+	<script src="/static/script/jquery-1.7.2.js"></script>
+	<script>
+		$(function (){
+			// $("#show").hide()
+			//给添加购物车按钮添加单击事件
+			$(".addBookCart").click(function (){
+				//获取要添加的bookid
+				var bookID = $(this).attr("id");
+				var url = "/addBookCart"
+				//设置请求参数
+				var param = {"bookID":bookID}
+				$.post(url,param,function (res){
+					//将响应信息设置到span中
+					// $("#show").show()
+					$("#bookMsg").text(res)
+				})
+			})
+		})
+
+	</script>
+</head>
+<body>
+	
+	<div id="header">
+			<span class="wel_word">图书管理系统</span>
+		{{if .IsLogin}}
+		<div>
+			<span>欢迎<span class="um_span">{{.Username}}</span>光临书城系统</span>
+			<a href="/getCartInfo">购物车</a>
+			<a href="/pages/manager/manager.html">后台管理</a>
+			<a href="/logout">注销</a>&nbsp;&nbsp;
+			<a href="/index">返回</a>
+		</div>
+		{{else}}
+			<div>
+				<a href="/pages/user/login.html">登录</a> | 
+				<a href="/pages/user/regist.html">注册</a> &nbsp;&nbsp;
+				<a href="/pages/cart/cart.html">购物车</a>
+				<a href="/pages/manager/manager.html">后台管理</a>
+			</div>
+		{{end}}
+	</div>
+	
+	<div id="main">
+		<div id="book">
+			<div class="book_cond">
+				<form action="/index" method="post">
+					价格：<input type="text" name="min"> 元 - <input type="text" name="max"> 元 <button>查询</button>
+				</form>
+			</div>
+			<div style="text-align: center">
+				<span>您的购物车中有3件商品</span>
+				<div>
+					<span style="color: red" id="bookMsg"></span>
+				</div>
+			</div>
+			{{range .Book}}
+			<div class="b_list">
+				<div class="img_div">
+					<img class="book_img" alt="" src="{{.ImgPath}}" />
+				</div>
+				<div class="book_info">
+					<div class="book_name">
+						<span class="sp1">书名:</span>
+						<span class="sp2">{{.Title}}</span>
+					</div>
+					<div class="book_author">
+						<span class="sp1">作者:</span>
+						<span class="sp2">{{.Author}}</span>
+					</div>
+					<div class="book_price">
+						<span class="sp1">价格:</span>
+						<span class="sp2">{{.Price}}</span>
+					</div>
+					<div class="book_sales">
+						<span class="sp1">销量:</span>
+						<span class="sp2">{{.Sales}}</span>
+					</div>
+					<div class="book_amount">
+						<span class="sp1">库存:</span>
+						<span class="sp2">{{.Stock}}</span>
+					</div>
+					<div class="book_add">
+						<button id="{{.ID}}" class="addBookCart">加入购物车</button>
+<!--						<input type="hidden" name="bookID" value="{{.ID}}">-->
+					</div>
+				</div>
+			</div>
+			{{end}}
+		</div>
+
+		<div id="page_nav">
+			{{if .IsHasPrev}}
+			<a href="/index?min={{.MinPrice}}&max={{.MaxPrice}}">首页</a>
+			<a href="/index?pageNo={{.GetPrevPageNo}}&min={{.MinPrice}}&max={{.MaxPrice}}">上一页</a>
+			{{end}}
+			当前是第{{.PageNo}}页: 共{{.TotalPageNo}}页，{{.TotalRecord}}条记录
+			{{if .IsHasNext}}
+			<a href="/index?pageNo={{.GetNextPageNo}}&min={{.MinPrice}}&max={{.MaxPrice}}">下一页</a>
+			<a href="/index?pageNo={{.TotalPageNo}}&min={{.MinPrice}}&max={{.MaxPrice}}">末页</a>
+			{{end}}
+			到第<input value="4" name="pn" id="pn_input"/>页
+			<input type="button" value="确定">
+		</div>
+	
+	</div>
+
+</body>
+</html>

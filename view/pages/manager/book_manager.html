@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>图书管理</title>
+<link type="text/css" rel="stylesheet" href="/static/css/style.css" >
+<script src="/static/script/jquery-1.7.2.js"></script>
+	<script >
+		$(function (){
+			$(".deletebook").click(function (){
+				var title = $(this).attr("id")
+				return confirm("确定要删除【"+title+"】这本书么?")
+			})
+		})
+	</script>
+</head>
+<body>
+	
+	<div id="header">
+			<span class="wel_word">图书管理系统</span>
+			<div>
+				<a href="/GetPageBook">图书管理</a>
+				<a href="/index">返回商城</a>
+			</div>
+	</div>
+	
+	<div id="main">
+		<table>
+			<tr>
+				<td>名称</td>
+				<td>作者</td>
+				<td>价格</td>
+				<td>销量</td>
+				<td>库存</td>
+				<td colspan="2">操作</td>
+			</tr>
+			{{range .Book}}
+			<tr>
+				<td>{{.Title}}</td>
+				<td>{{.Author}}</td>
+				<td>{{.Price}}</td>
+				<td>{{.Sales}}</td>
+				<td>{{.Stock}}</td>
+				<td><a href="/updateByIDToAddBook?bookId={{.ID}}">修改</a></td>
+				<td><a id="{{.Title}}" class="deletebook" href="/deleteBook?bookId={{.ID}}">删除</a></td>
+			</tr>
+			{{end}}
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td><a  href="/updateByIDToAddBook">添加图书</a></td>
+			</tr>
+		</table>
+		<div id="page_nav">
+			{{if .IsHasPrev}}
+			<a href="/getPageBook">首页</a>
+			<a href="/getPageBook?pageNo={{.GetPrevPageNo}}">上一页</a>
+			{{end}}
+			当前是第{{.PageNo}}页: 共{{.TotalPageNo}}页，{{.TotalRecord}}条记录
+			{{if .IsHasNext}}
+			<a href="/getPageBook?pageNo={{.GetNextPageNo}}">下一页</a>
+			<a href="/getPageBook?pageNo={{.TotalPageNo}}">末页</a>
+			{{end}}
+			 到第<input value="4" name="pn" id="pn_input"/>页
+			<input type="button" value="确定">
+		</div>
+	</div>
+
+</body>
+</html>
