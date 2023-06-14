@@ -16,6 +16,15 @@
 				var title = $(this).attr("id")
 				return confirm("确定要删除["+title+"]这本图书么?")
 			})
+			//给输入的购物项数量的input绑定change事件
+			$(".updateCartItem").change(function (){
+				//获取当前购物项的id
+				var cartItemID = $(this).attr("id")
+				//获取用户输入的图书数量
+				var bookCount = $(this).val()
+				// 发送请求
+				location = "/updateCartItem?cartItemID="+cartItemID+"&bookCount="+bookCount
+			})
 		})
 
 	</script>
@@ -55,7 +64,9 @@
 			{{range .Cart.CartItem}}
 			<tr>
 				<td>{{.Book.Title}}</td>
-				<td>{{.Count}}</td>
+				<td>
+					<input id="{{.CartItemID}}" class="updateCartItem" type="text" value="{{.Count}}" style="text-align: center;width: 50px"/>
+				</td>
 				<td>{{.Book.Price}}</td>
 				<td>{{.Amount}}</td>
 				<td><a id="{{.Book.Title}}" class="deleteCartItem" href="/deleteCartItem?cartItemID={{.CartItemID}}">删除</a></td>
@@ -70,7 +81,7 @@
 			<span class="cart_span" ><a href="/deleteCart?cartID={{.Cart.CartID}}" id="deleteCart1" >清空购物车</a>
 				<input type="hidden" value="{{.Cart.CartID}}">
 			</span>
-			<span class="cart_span"><a href="/pages/cart/checkout.html">去结账</a></span>
+			<span class="cart_span"><a href="/checkout">去结账</a></span>
 		</div>
 		{{else}}
 		<h1>没有购物车</h1>

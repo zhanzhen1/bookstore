@@ -87,8 +87,12 @@
 						<span class="sp2">{{.Stock}}</span>
 					</div>
 					<div class="book_add">
+						{{if .Stock}}
 						<button id="{{.ID}}" class="addBookCart">加入购物车</button>
 <!--						<input type="hidden" name="bookID" value="{{.ID}}">-->
+						{{else}}
+						<span style="color: red">库存没货了</span>
+						{{end}}
 					</div>
 				</div>
 			</div>

@@ -81,7 +81,3 @@ func TestDeleteCartItemByID(t *testing.T) {
 		return
 	}
 }
-
-func TestTuiSong11(t *testing.T) {
-	fmt.Println("测试推送")
-}
