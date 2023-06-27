@@ -2,15 +2,28 @@ package main
 
 import (
 	"bookstore/controller"
+	"github.com/gin-gonic/gin"
+	_ "github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func main() {
+	//创建一个路由
+	ginServer := gin.Default()
+	//全局加载
+	ginServer.LoadHTMLGlob("view/**/*")
+	//单个文件加载
+	//ginServer.LoadHTMLFiles("view/index.html")
+	//加载静态资源
+	ginServer.Static("/static", "./static")
+	ginServer.GET("/index", controller.GetPageBookByPrice1())
+	ginServer.Run(":8080")
+
 	//处理静态资源
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("bookstore/view/static"))))
-	http.Handle("/pages/", http.StripPrefix("/pages/", http.FileServer(http.Dir("bookstore/view/pages"))))
+	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("view/static"))))
+	//http.Handle("/pages/", http.StripPrefix("/pages/", http.FileServer(http.Dir("view/pages"))))
 	//首页
-	http.HandleFunc("/index", controller.GetPageBookByPrice)
+	//http.HandleFunc("/index", controller.GetPageBookByPrice)
 
 	//登录
 	http.HandleFunc("/login", controller.Login)

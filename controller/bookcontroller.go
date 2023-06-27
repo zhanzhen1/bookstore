@@ -4,6 +4,7 @@ import (
 	"bookstore/dao"
 	"bookstore/model"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"html/template"
 	"log"
 	"net/http"
@@ -11,23 +12,27 @@ import (
 	"strconv"
 )
 
-//func Getbook(w http.ResponseWriter, r *http.Request) {
-//	wd, err := os.Getwd()
-//	if err != nil {
-//		log.Fatal(err)
+//func GetBook() (handlerFunc gin.HandlerFunc) {
+//	//wd, err := os.Getwd()
+//	//if err != nil {
+//	//	log.Fatal(err)
+//	//}
+//	return func(context *gin.Context) {
+//		//获取图书
+//		book, err := dao.GetBook()
+//		if err != nil {
+//			fmt.Println("查询失败")
+//			return
+//		}
+//		context.HTML(200, "/book_manager.html", book)
 //	}
-//	//获取图书
-//	book, err := dao.GetBook()
-//	if err != nil {
-//		fmt.Println("查询失败")
-//		return
-//	}
-//	files, err := template.ParseFiles(wd + "/bookstore/view/pages/manager/book_manager.html")
-//	if err != nil {
-//		fmt.Println("跳转失败 err", err)
-//		return
-//	}
-//	files.Execute(w, book)
+//
+//	//files, err := template.ParseFiles(wd + "/bookstore/view/pages/manager/book_manager.html")
+//	//if err != nil {
+//	//	fmt.Println("跳转失败 err", err)
+//	//	return
+//	//}
+//	//files.Execute(w, book)
 //}
 
 //添加图书
@@ -205,10 +210,55 @@ func GetPageBookByPrice(w http.ResponseWriter, r *http.Request) {
 		page.IsLogin = true
 		page.Username = session.UserName
 	}
-	files, err := template.ParseFiles(wd + "/bookstore/view/index.html")
+	files, err := template.ParseFiles(wd + "/view/index.html")
 	if err != nil {
 		fmt.Println("跳转失败 err", err)
 		return
 	}
 	files.Execute(w, page)
+}
+
+// gin index
+func GetPageBookByPrice1() (handlerFunc gin.HandlerFunc) {
+	return func(context *gin.Context) {
+		pageNo := context.Param("pageNo")
+		if pageNo == "" {
+			pageNo = "1"
+		}
+		var page *model.Page
+		minPrice := context.Param("min")
+		maxPrice := context.Param("max")
+		//如果minPrice=空值就是翻页
+		if minPrice == "" && maxPrice == "" {
+			page, _ = dao.GetPageBook(pageNo)
+			//if err != nil {
+			//	fmt.Println("查询失败")
+			//	return
+			//}
+		} else { //查询
+			page, _ = dao.GetPageBookByPrice(pageNo, minPrice, maxPrice)
+			//获取图书
+			//if err != nil {
+			//	fmt.Println("查询失败")
+			//	return
+			//}
+			//将价格范围设置到page中
+			page.MinPrice = minPrice
+			page.MaxPrice = maxPrice
+		}
+		//调用IsLogin
+		faly, session := dao.IsLogin(context.Request)
+		if faly {
+			//设置page中IsLogin和username字段
+			page.IsLogin = true
+			page.Username = session.UserName
+		}
+		//files, err := template.ParseFiles(wd + "/view/index.html")
+		//if err != nil {
+		//	fmt.Println("跳转失败 err", err)
+		//	return
+		//}
+		//files.Execute(w, page)
+		context.HTML(http.StatusOK, "index.html", page)
+	}
 }
