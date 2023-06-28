@@ -13,6 +13,9 @@ var (
 func init() {
 	Db, err = sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/bookstore")
 	if err != nil {
-		return
+		panic(err)
+	}
+	if err := Db.Ping(); err != nil {
+		panic(err)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"bookstore/model"
 	"bookstore/utils"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"html/template"
 	"log"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 )
 
 // 登录
-func Login(w http.ResponseWriter, r *http.Request) {
+func Login1(w http.ResponseWriter, r *http.Request) {
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -21,7 +22,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	faly, _ := dao.IsLogin(r)
 	if faly {
 		//已经登录
-		GetPageBookByPrice(w, r)
+		GetPageBookByPrice()
 	} else {
 		//获取用户名密码
 		username := r.PostFormValue("username")
@@ -73,8 +74,65 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// gin 优化登录
+func Login() (handleFunc gin.HandlerFunc) {
+	return func(context *gin.Context) {
+		//判断是否已经登录
+		faly, _ := dao.IsLogin(context.Request)
+		if faly {
+			//已经登录
+			GetPageBookByPrice()
+		} else {
+			//获取用户名密码
+			username := context.PostForm("username")
+			password := context.PostForm("password")
+			//调用验证用户名和密码的方法
+			user, _ := dao.Login(username, password)
+			//if err != nil {
+			//	fmt.Println("Login() err ", err)
+			//	return
+			//}
+			fmt.Println("获取的user是", user)
+			if user != nil {
+				//生成uuid
+				//uuid := utils.CreateUUID()
+				////创建一个session
+				//session := &model.Session{
+				//	SessionID: uuid,
+				//	UserName:  username,
+				//	UserID:    user.ID,
+				//}
+				//将创建得seesion保存到数据库中
+				//err := dao.AddSession(session)
+				//if err != nil {
+				//	return
+				//}
+				//创建cookie
+				//cookie := &http.Cookie{
+				//	Name:     "user",
+				//	Value:    uuid,
+				//	HttpOnly: true,
+				//}
+				//将cookie发送给浏览器
+				//cookie, err := context.Cookie("user")
+				//if err != nil {
+				//	fmt.Println("context.Cookie() err", err)
+				//	return
+				//}
+				//context.SetCookie("user", uuid, 3600, "/", "localhost", false, true)
+				//fmt.Println(cookie)
+				context.HTML(http.StatusOK, "login_success.html", user)
+			} else {
+				context.HTML(http.StatusOK, "login.html", "用户名和密码不正确")
+				fmt.Println("用户名和密码不正确")
+			}
+		}
+	}
+
+}
+
 // 注销
-func Logout(w http.ResponseWriter, r *http.Request) {
+func Logout1(w http.ResponseWriter, r *http.Request) {
 	//获取cookie
 	cookie, err := r.Cookie("user")
 	if err != nil {
@@ -93,8 +151,34 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		//将修改之后得cookie发送给浏览器
 		http.SetCookie(w, cookie)
 		//去首页
-		GetPageBookByPrice(w, r)
+		GetPageBookByPrice()
 	}
+}
+
+// gin 优化注销
+func Logout() (handlerFunc gin.HandlerFunc) {
+	return func(context *gin.Context) {
+		//获取cookie
+		cookie, err := context.Cookie("user")
+		if err != nil {
+			return
+		}
+		fmt.Println("cookie", cookie)
+		if cookie != "" {
+			//删除数据库对应得session中的用户名
+			err := dao.DeleteSession(cookie)
+			if err != nil {
+				fmt.Println("DeleteSession() err", err)
+				return
+			}
+			//设置cookie失效  maxage=0 未设置 maxage<0 失效 maxage>0 存在
+			context.SetCookie("user", cookie, -1, "/", "localhost", false, true)
+			//将修改之后得cookie发送给浏览器
+			//去首页
+			GetPageBookByPrice()
+		}
+	}
+
 }
 
 // 注册用户

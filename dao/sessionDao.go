@@ -22,6 +22,7 @@ func DeleteSession(sessionID string) error {
 	sqlStr := "delete from session where session_id = ?"
 	_, err := utils.Db.Exec(sqlStr, sessionID)
 	if err != nil {
+		fmt.Println("DeleteSession() err", err)
 		return err
 	}
 	return nil
@@ -57,8 +58,9 @@ func IsLogin(r *http.Request) (bool, *model.Session) {
 	fmt.Println("cookie :", cookie)
 	if cookie != nil {
 		cookieValue := cookie.Value
+		fmt.Println("cookieValue:", cookieValue)
 		session, _ := GetSession(cookieValue)
-		fmt.Println(session)
+		fmt.Println("session:", session)
 		if session != nil {
 			//已经登录了
 			return true, session
