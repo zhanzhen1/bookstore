@@ -16,5 +16,13 @@ copy .env.example .env
 安装依赖
 
 ```shell
+go mod tidy
+```
 
+初始化数据库, sql 文件为 bookstore.sql
+
+运行服务
+
+```shell
+go run main.go
 ```
