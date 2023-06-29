@@ -2,30 +2,37 @@ package main
 
 import (
 	"bookstore/controller"
+	"bookstore/utils"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin"
-	"os"
+	"github.com/joho/godotenv"
+	"io/fs"
+	"log"
 	"path/filepath"
 	"strings"
 )
 
 func main() {
+	// 加载 .env 配置
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("loading .env file failed")
+	}
+	// 初始化数据库
+	if err := utils.InitDB(); err != nil {
+		log.Fatalf("init database failed: %s", err.Error())
+	}
 	//创建一个路由
 	ginServer := gin.Default()
-	//全局加载
-	//ginServer.LoadHTMLGlob("view/***/**/*")
-	//单个文件加载
-	//ginServer.LoadHTMLFiles("view/index.html", "view/pages/manager/manager.html",
-	//	"view/pages/manager/book_manager.html")
-	//加载以.html为后缀的文件
-	var files []string
-	filepath.Walk("./view", func(path string, info os.FileInfo, err error) error {
-		if strings.HasSuffix(path, ".html") {
-			files = append(files, path)
-		}
-		return nil
-	})
 
+	// 加载所有 html 模板文件
+	files, err := GetDirHTMLFiles("./view")
+	if err != nil {
+		log.Fatalf("load view folder html files failed: %s", err.Error())
+	}
+	for _, file := range files {
+		fmt.Println(file)
+	}
 	ginServer.LoadHTMLFiles(files...)
 	//加载静态资源
 	ginServer.Static("/static", "./static")
@@ -89,4 +96,19 @@ func main() {
 
 	//http.ListenAndServe("localhost:8080", nil)
 
+}
+
+// GetDirHTMLFiles get all the html files in the folder
+func GetDirHTMLFiles(path string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
+		if strings.HasSuffix(path, "html") {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
 }

@@ -10,7 +10,7 @@ import (
 // addSession向数据库中添加session
 func AddSession(session *model.Session) error {
 	sqlStr := "insert into session values (?,?,?)"
-	_, err := utils.Db.Exec(sqlStr, session.SessionID, session.UserName, session.UserID)
+	_, err := utils.DB.Exec(sqlStr, session.SessionID, session.UserName, session.UserID)
 	if err != nil {
 		return err
 	}
@@ -20,7 +20,7 @@ func AddSession(session *model.Session) error {
 // 删除数据库session
 func DeleteSession(sessionID string) error {
 	sqlStr := "delete from session where session_id = ?"
-	_, err := utils.Db.Exec(sqlStr, sessionID)
+	_, err := utils.DB.Exec(sqlStr, sessionID)
 	if err != nil {
 		fmt.Println("DeleteSession() err", err)
 		return err
@@ -31,7 +31,7 @@ func DeleteSession(sessionID string) error {
 // 获取seesion
 func GetSession(sessionID string) (*model.Session, error) {
 	sqlStr := "select * from session where session_id = ?"
-	prepare, err := utils.Db.Prepare(sqlStr)
+	prepare, err := utils.DB.Prepare(sqlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func GetSession(sessionID string) (*model.Session, error) {
 		fmt.Println("session scan err", err)
 		return nil, err
 	}
-	//row := utils.Db.QueryRow(sqlStr, sessionID)
+	//row := utils.DB.QueryRow(sqlStr, sessionID)
 	//session := &model.Session{}
 	//err := row.Scan(&session.SessionID, &session.Username, &session.UserID)
 	//if err != nil {
