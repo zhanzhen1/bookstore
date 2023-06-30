@@ -51,6 +51,12 @@ func main() {
 	ginServer.POST("/login", controller.Login())
 	//注销
 	ginServer.GET("/logout", controller.Logout())
+	//根据id跳转新增图书页面or更新图书页面
+	ginServer.GET("/updateByIDToAddBook", controller.UpdateByIDToAddBook())
+	//更新or新增图书
+	ginServer.POST("/updateOrAddBook", controller.UpdateOrAddBook())
+	//删除图书
+	ginServer.GET("/deleteBook", controller.DeleteBook())
 
 	ginServer.Run(":8080")
 

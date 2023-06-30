@@ -5,38 +5,95 @@ import (
 	"bookstore/model"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"html/template"
-	"log"
 	"net/http"
-	"os"
 	"strconv"
 )
 
-//func GetBook() (handlerFunc gin.HandlerFunc) {
-//	//wd, err := os.Getwd()
-//	//if err != nil {
-//	//	log.Fatal(err)
-//	//}
-//	return func(context *gin.Context) {
-//		//获取图书
-//		book, err := dao.GetBook()
-//		if err != nil {
-//			fmt.Println("查询失败")
-//			return
-//		}
-//		context.HTML(200, "/book_manager.html", book)
+// 定义全局page
+var page *model.Page
+var err error
+
+// 删除图书
+//func DeleteBook1(w http.ResponseWriter, r *http.Request) {
+//	bookID := r.FormValue("bookId")
+//	err := dao.DeleteBook(bookID)
+//	if err != nil {
+//		fmt.Println("删除 err", err)
+//		return
 //	}
-//
-//	//files, err := template.ParseFiles(wd + "/bookstore/view/pages/manager/book_manager.html")
-//	//if err != nil {
-//	//	fmt.Println("跳转失败 err", err)
-//	//	return
-//	//}
-//	//files.Execute(w, book)
+//	//调用GetBook 再查询一次数据库
+//	GetPageBook()
 //}
 
-//添加图书
-//func AddBook(w http.ResponseWriter, r *http.Request) {
+// gin 优化删除图书
+func DeleteBook() (handlerFunc gin.HandlerFunc) {
+	return func(context *gin.Context) {
+		bookID := context.Query("bookId")
+		err = dao.DeleteBook(bookID)
+		if err != nil {
+			fmt.Println("删除 err", err)
+			return
+		}
+		//调用GetBook 再查询一次数据库
+		page, err = dao.GetPageBook(pageNo)
+		if err != nil {
+			return
+		}
+		context.HTML(http.StatusOK, "book_manager.html", page)
+	}
+
+}
+
+// 根据id获取图书 跳转到更新或者新增图书界面
+//func UpdateByIDToAddBook1(w http.ResponseWriter, r *http.Request) {
+//	wd, err := os.Getwd()
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	bookID := r.FormValue("bookId")
+//	book, err := dao.UpdateByIdBook(bookID)
+//	if err != nil {
+//		return
+//	}
+//	if book.ID > 0 {
+//		//更新
+//		files, err := template.ParseFiles(wd + "/bookstore/view/pages/manager/book_add.html")
+//		if err != nil {
+//			return
+//		}
+//		files.Execute(w, book)
+//	} else {
+//		//添加图书
+//		files, err := template.ParseFiles(wd + "/bookstore/view/pages/manager/book_add.html")
+//		if err != nil {
+//			return
+//		}
+//		files.Execute(w, "")
+//	}
+//}
+
+// gin 优化根据id获取图书 跳转到更新或者新增图书界面
+func UpdateByIDToAddBook() (handlerFunc gin.HandlerFunc) {
+	return func(context *gin.Context) {
+		bookID := context.Query("bookId")
+		book, err := dao.UpdateByIdBook(bookID)
+		if err != nil {
+			return
+		}
+		if book.ID > 0 {
+			//更新
+			context.HTML(http.StatusOK, "book_add.html", book)
+		} else {
+			//添加图书
+			context.HTML(http.StatusOK, "book_add.html", nil)
+		}
+	}
+
+}
+
+// 更新或添加图书图书
+//func UpdateOrAddBook1(w http.ResponseWriter, r *http.Request) {
+//	bookID := r.PostFormValue("bookID")
 //	title := r.PostFormValue("title")
 //	price := r.PostFormValue("price")
 //	author := r.PostFormValue("author")
@@ -47,114 +104,94 @@ import (
 //	//base 进制 bitsize 类型
 //	fsales, _ := strconv.ParseInt(sales, 10, 0)
 //	fstock, _ := strconv.ParseInt(stock, 10, 0)
+//	fbookID, _ := strconv.ParseInt(bookID, 10, 0)
 //	book := &model.Book{
+//		ID:      int(fbookID),
 //		Title:   title,
 //		Author:  author,
 //		Price:   fprice,
 //		Sales:   int(fsales),
 //		Stock:   int(fstock),
-//		ImgPath: "/bookstore/view/static/img/logo.gif",
+//		ImgPath: "/bookstore/view/static/img/default.jpg",
 //	}
-//	err := dao.AddBook(book)
-//	if err != nil {
-//		fmt.Println("addbook err", err)
-//		return
+//	if book.ID > 0 {
+//		//修改
+//		err := dao.UpdateBook(book)
+//		if err != nil {
+//			fmt.Println("update err", err)
+//			return
+//		}
+//	} else {
+//		//添加
+//		err := dao.AddBook(book)
+//		if err != nil {
+//			fmt.Println("add err", err)
+//			return
+//		}
 //	}
 //	//调用GetBook 再查询一次数据库
-//	Getbook(w, r)
+//	GetPageBook()
 //}
 
-// 删除图书
-func DeleteBook(w http.ResponseWriter, r *http.Request) {
-	bookID := r.FormValue("bookId")
-	err := dao.DeleteBook(bookID)
-	if err != nil {
-		fmt.Println("删除 err", err)
-		return
-	}
-	//调用GetBook 再查询一次数据库
-	GetPageBook()
-}
-
-// 根据id获取图书 跳转到更新或者新增图书界面
-func UpdateByIDToAddBook(w http.ResponseWriter, r *http.Request) {
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	bookID := r.FormValue("bookId")
-	book, err := dao.UpdateByIdBook(bookID)
-	if err != nil {
-		return
-	}
-	if book.ID > 0 {
-		//更新
-		files, err := template.ParseFiles(wd + "/bookstore/view/pages/manager/book_add.html")
-		if err != nil {
-			return
-		}
-		files.Execute(w, book)
-	} else {
-		//添加图书
-		files, err := template.ParseFiles(wd + "/bookstore/view/pages/manager/book_add.html")
-		if err != nil {
-			return
-		}
-		files.Execute(w, "")
-	}
-}
-
 // 更新或添加图书图书
-func UpdateOrAddBook(w http.ResponseWriter, r *http.Request) {
-	bookID := r.PostFormValue("bookID")
-	title := r.PostFormValue("title")
-	price := r.PostFormValue("price")
-	author := r.PostFormValue("author")
-	sales := r.PostFormValue("sales")
-	stock := r.PostFormValue("stock")
-	//将价格和库存进行转换
-	fprice, _ := strconv.ParseFloat(price, 64)
-	//base 进制 bitsize 类型
-	fsales, _ := strconv.ParseInt(sales, 10, 0)
-	fstock, _ := strconv.ParseInt(stock, 10, 0)
-	fbookID, _ := strconv.ParseInt(bookID, 10, 0)
-	book := &model.Book{
-		ID:      int(fbookID),
-		Title:   title,
-		Author:  author,
-		Price:   fprice,
-		Sales:   int(fsales),
-		Stock:   int(fstock),
-		ImgPath: "/bookstore/view/static/img/default.jpg",
-	}
-	if book.ID > 0 {
-		//修改
-		err := dao.UpdateBook(book)
+func UpdateOrAddBook() (handlerFunc gin.HandlerFunc) {
+	return func(context *gin.Context) {
+		bookID := context.PostForm("bookID")
+		title := context.PostForm("title")
+		price := context.PostForm("price")
+		author := context.PostForm("author")
+		sales := context.PostForm("sales")
+		stock := context.PostForm("stock")
+		//将价格和库存进行转换
+		fprice, _ := strconv.ParseFloat(price, 64)
+		//base 进制 bitsize 类型
+		fsales, _ := strconv.ParseInt(sales, 10, 0)
+		fstock, _ := strconv.ParseInt(stock, 10, 0)
+		fbookID, _ := strconv.ParseInt(bookID, 10, 0)
+		book := &model.Book{
+			ID:      int(fbookID),
+			Title:   title,
+			Author:  author,
+			Price:   fprice,
+			Sales:   int(fsales),
+			Stock:   int(fstock),
+			ImgPath: "/bookstore/view/static/img/default.jpg",
+		}
+		if book.ID > 0 {
+			//修改
+			err := dao.UpdateBook(book)
+			if err != nil {
+				fmt.Println("update err", err)
+				return
+			}
+		} else {
+			//添加
+			err := dao.AddBook(book)
+			if err != nil {
+				fmt.Println("add err", err)
+				return
+			}
+		}
+		//调用GetBook 再查询一次数据库
+		page, err = dao.GetPageBook(pageNo)
 		if err != nil {
-			fmt.Println("update err", err)
 			return
 		}
-	} else {
-		//添加
-		err := dao.AddBook(book)
-		if err != nil {
-			fmt.Println("add err", err)
-			return
-		}
+		context.HTML(http.StatusOK, "book_manager.html", page)
 	}
-	//调用GetBook 再查询一次数据库
-	GetPageBook()
 }
+
+var pageNo string
 
 // 获取分页图书
 func GetPageBook() (handlerFunc gin.HandlerFunc) {
 	return func(context *gin.Context) {
-		pageNo := context.Query("pageNo")
+		pageNo = context.Query("pageNo")
 		if pageNo == "" {
 			pageNo = "1"
 		}
 		//获取图书
-		page, err := dao.GetPageBook(pageNo)
+		page, err = dao.GetPageBook(pageNo)
 		if err != nil {
 			fmt.Println("查询失败")
 			return
