@@ -4,7 +4,7 @@ import (
 	"bookstore/model"
 	"bookstore/utils"
 	"fmt"
-	"net/http"
+	"github.com/gin-gonic/gin"
 )
 
 // addSession向数据库中添加session
@@ -44,7 +44,7 @@ func GetSession(sessionID string) (*model.Session, error) {
 	}
 	//row := utils.DB.QueryRow(sqlStr, sessionID)
 	//session := &model.Session{}
-	//err := row.Scan(&session.SessionID, &session.Username, &session.UserID)
+	//err := row.Scan(&session.SessionID, &session.UserName, &session.UserID)
 	//if err != nil {
 	//	fmt.Println("session scan err", err)
 	//	return nil, err
@@ -53,11 +53,11 @@ func GetSession(sessionID string) (*model.Session, error) {
 }
 
 // 判断是否已经登录
-func IsLogin(r *http.Request) (bool, *model.Session) {
-	cookie, _ := r.Cookie("user")
+func IsLogin(ctx *gin.Context) (bool, *model.Session) {
+	cookie, _ := ctx.Cookie("user")
 	fmt.Println("cookie :", cookie)
-	if cookie != nil {
-		cookieValue := cookie.Value
+	if cookie != "" {
+		cookieValue := cookie
 		fmt.Println("cookieValue:", cookieValue)
 		session, _ := GetSession(cookieValue)
 		fmt.Println("session:", session)

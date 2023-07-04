@@ -45,7 +45,7 @@ func main() {
 	ginServer.GET("/getLogin", controller.GetLogin())
 	//跳转注册
 	ginServer.GET("/getRegister", controller.GetRegister())
-	//跳转注册
+	//跳转购物车
 	ginServer.GET("/getCart", controller.GetCart())
 	//登录
 	ginServer.POST("/login", controller.Login())
@@ -57,7 +57,20 @@ func main() {
 	ginServer.POST("/updateOrAddBook", controller.UpdateOrAddBook())
 	//删除图书
 	ginServer.GET("/deleteBook", controller.DeleteBook())
-
+	//注册用户 Register
+	ginServer.POST("/register", controller.Register())
+	//添加图书到购物车
+	ginServer.POST("/addBookCart", controller.AddBookCart())
+	//根据用户id获取用户的购物车
+	ginServer.GET("/getCartInfo", controller.GetCartInfo())
+	//清空购物车
+	ginServer.GET("/deleteCart", controller.DeleteCart())
+	//删除购物项
+	ginServer.GET("/deleteCartItemByID", controller.DeleteCartItemByID())
+	//更新购物项
+	ginServer.GET("/updateCartItem", controller.UpdateCartItem())
+	//结账
+	ginServer.GET("/checkout", controller.Checkout())
 	ginServer.Run(":8080")
 
 	//处理静态资源

@@ -5,6 +5,7 @@ import (
 	"bookstore/model"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -175,6 +176,7 @@ func UpdateOrAddBook() (handlerFunc gin.HandlerFunc) {
 		//调用GetBook 再查询一次数据库
 		page, err = dao.GetPageBook(pageNo)
 		if err != nil {
+			log.Fatal("查询图书失败")
 			return
 		}
 		context.HTML(http.StatusOK, "book_manager.html", page)
@@ -280,7 +282,7 @@ func GetPageBookByPrice() (handlerFunc gin.HandlerFunc) {
 			page.MaxPrice = maxPrice
 		}
 		//调用IsLogin
-		faly, session := dao.IsLogin(context.Request)
+		faly, session := dao.IsLogin(context)
 		if faly {
 			//设置page中IsLogin和username字段
 			page.IsLogin = true

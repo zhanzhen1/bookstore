@@ -35,6 +35,7 @@ func GetBookByID(id string) (*model.Book, error) {
 	book := &model.Book{}
 	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Price, &book.Sales, &book.Stock, &book.ImgPath)
 	if err != nil {
+		fmt.Println("GetBookByID() err", err)
 		return nil, err
 	}
 	return book, nil
