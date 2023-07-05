@@ -9,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 	"io/fs"
 	"log"
+	"net/http"
 	"path/filepath"
 	"strings"
 )
@@ -36,6 +37,14 @@ func main() {
 	ginServer.LoadHTMLFiles(files...)
 	//加载静态资源
 	ginServer.Static("/static", "./static")
+	// 重定向到 /index 路由
+	ginServer.GET("/", func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusFound, "/index")
+	})
+	// 404 页面
+	ginServer.NoRoute(func(ctx *gin.Context) {
+		ctx.HTML(http.StatusNotFound, "404.html", gin.H{})
+	})
 	ginServer.GET("/index", controller.GetPageBookByPrice())
 	//跳转图书管理
 	ginServer.GET("/getPageBook", controller.GetPageBook())

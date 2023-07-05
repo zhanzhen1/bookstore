@@ -28,19 +28,20 @@ var err error
 
 // gin 优化删除图书
 func DeleteBook() (handlerFunc gin.HandlerFunc) {
-	return func(context *gin.Context) {
-		bookID := context.Query("bookId")
+	return func(ctx *gin.Context) {
+		bookID := ctx.Query("bookId")
 		err = dao.DeleteBook(bookID)
 		if err != nil {
 			fmt.Println("删除 err", err)
 			return
 		}
 		//调用GetBook 再查询一次数据库
-		page, err = dao.GetPageBook(pageNo)
+		page, err = dao.GetPageBook(GetPageNo(ctx))
 		if err != nil {
+			ReturnErr(ctx, err)
 			return
 		}
-		context.HTML(http.StatusOK, "book_manager.html", page)
+		ctx.HTML(http.StatusOK, "book_manager.html", page)
 	}
 
 }
@@ -136,13 +137,13 @@ func UpdateByIDToAddBook() (handlerFunc gin.HandlerFunc) {
 
 // 更新或添加图书图书
 func UpdateOrAddBook() (handlerFunc gin.HandlerFunc) {
-	return func(context *gin.Context) {
-		bookID := context.PostForm("bookID")
-		title := context.PostForm("title")
-		price := context.PostForm("price")
-		author := context.PostForm("author")
-		sales := context.PostForm("sales")
-		stock := context.PostForm("stock")
+	return func(ctx *gin.Context) {
+		bookID := ctx.PostForm("bookID")
+		title := ctx.PostForm("title")
+		price := ctx.PostForm("price")
+		author := ctx.PostForm("author")
+		sales := ctx.PostForm("sales")
+		stock := ctx.PostForm("stock")
 		//将价格和库存进行转换
 		fprice, _ := strconv.ParseFloat(price, 64)
 		//base 进制 bitsize 类型
@@ -174,12 +175,13 @@ func UpdateOrAddBook() (handlerFunc gin.HandlerFunc) {
 			}
 		}
 		//调用GetBook 再查询一次数据库
-		page, err = dao.GetPageBook(pageNo)
+		page, err = dao.GetPageBook(GetPageNo(ctx))
 		if err != nil {
-			log.Fatal("查询图书失败")
+			ReturnErr(ctx, err)
+			log.Println("查询图书失败", err)
 			return
 		}
-		context.HTML(http.StatusOK, "book_manager.html", page)
+		ctx.HTML(http.StatusOK, "book_manager.html", page)
 	}
 }
 
@@ -187,18 +189,15 @@ var pageNo string
 
 // 获取分页图书
 func GetPageBook() (handlerFunc gin.HandlerFunc) {
-	return func(context *gin.Context) {
-		pageNo = context.Query("pageNo")
-		if pageNo == "" {
-			pageNo = "1"
-		}
+	return func(ctx *gin.Context) {
 		//获取图书
-		page, err = dao.GetPageBook(pageNo)
+		page, err = dao.GetPageBook(GetPageNo(ctx))
 		if err != nil {
 			fmt.Println("查询失败")
+			ReturnErr(ctx, err)
 			return
 		}
-		context.HTML(http.StatusOK, "book_manager.html", page)
+		ctx.HTML(http.StatusOK, "book_manager.html", page)
 	}
 
 }
@@ -253,21 +252,18 @@ func GetPageBook() (handlerFunc gin.HandlerFunc) {
 
 // gin index
 func GetPageBookByPrice() (handlerFunc gin.HandlerFunc) {
-	return func(context *gin.Context) {
-		pageNo := context.Query("pageNo")
-		fmt.Println("page no", pageNo)
-		if pageNo == "" {
-			pageNo = "1"
-		}
+	return func(ctx *gin.Context) {
 		var page *model.Page
 		var err error
-		minPrice := context.Query("min")
-		maxPrice := context.Query("max")
+		minPrice := ctx.Query("min")
+		maxPrice := ctx.Query("max")
+		pageNo := GetPageNo(ctx)
 		//如果minPrice=空值就是翻页
 		if minPrice == "" && maxPrice == "" {
 			page, err = dao.GetPageBook(pageNo)
 			if err != nil {
 				fmt.Println("GetPageBook()查询失败", err)
+				ReturnErr(ctx, err)
 				return
 			}
 		} else { //查询
@@ -275,6 +271,7 @@ func GetPageBookByPrice() (handlerFunc gin.HandlerFunc) {
 			//获取图书
 			if err != nil {
 				fmt.Println("GetPageBookByPrice查询失败", err)
+				ReturnErr(ctx, err)
 				return
 			}
 			//将价格范围设置到page中
@@ -282,12 +279,12 @@ func GetPageBookByPrice() (handlerFunc gin.HandlerFunc) {
 			page.MaxPrice = maxPrice
 		}
 		//调用IsLogin
-		faly, session := dao.IsLogin(context)
+		faly, session := dao.IsLogin(ctx)
 		if faly {
 			//设置page中IsLogin和username字段
 			page.IsLogin = true
 			page.Username = session.UserName
 		}
-		context.HTML(http.StatusOK, "index.html", page)
+		ctx.HTML(http.StatusOK, "index.html", page)
 	}
 }

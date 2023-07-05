@@ -4,7 +4,6 @@ import (
 	"bookstore/model"
 	"bookstore/utils"
 	"fmt"
-	"strconv"
 )
 
 // 获取所有图书
@@ -92,12 +91,7 @@ func UpdateBook(book *model.Book) error {
 }
 
 // 获取带分页的图书信息
-func GetPageBook(pageNo string) (*model.Page, error) {
-	//转换成int64
-	iPageNo, err := strconv.ParseInt(pageNo, 10, 64)
-	if err != nil {
-		return nil, err
-	}
+func GetPageBook(pageNo int64) (*model.Page, error) {
 	//获取数据库图书的总数
 	sqlStr := "select count(*) from book "
 	var totalRecord int64
@@ -114,7 +108,7 @@ func GetPageBook(pageNo string) (*model.Page, error) {
 		totalPageNo = totalRecord/pageSize + 1
 	}
 	sqlStr2 := "select * from book limit ?,?"
-	query2, err := utils.DB.Query(sqlStr2, (iPageNo-1)*pageSize, pageSize)
+	query2, err := utils.DB.Query(sqlStr2, (pageNo-1)*pageSize, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -130,19 +124,14 @@ func GetPageBook(pageNo string) (*model.Page, error) {
 		Book:        books,
 		TotalPageNo: totalPageNo,
 		TotalRecord: totalRecord,
-		PageNo:      iPageNo,
+		PageNo:      pageNo,
 		PageSize:    pageSize,
 	}
 	return page, nil
 }
 
 // 带价格查询
-func GetPageBookByPrice(pageNo string, minPrice string, maxPrice string) (*model.Page, error) {
-	//转换成int64
-	iPageNo, err := strconv.ParseInt(pageNo, 10, 64)
-	if err != nil {
-		return nil, err
-	}
+func GetPageBookByPrice(pageNo int64, minPrice string, maxPrice string) (*model.Page, error) {
 	//获取数据库图书的总数
 	sqlStr := "select count(*) from book where price between ? and	?"
 	var totalRecord int64
@@ -159,7 +148,7 @@ func GetPageBookByPrice(pageNo string, minPrice string, maxPrice string) (*model
 		totalPageNo = totalRecord/pageSize + 1
 	}
 	sqlStr2 := "select * from book where price between ? and ? limit ?,?"
-	query2, err := utils.DB.Query(sqlStr2, minPrice, maxPrice, (iPageNo-1)*pageSize, pageSize)
+	query2, err := utils.DB.Query(sqlStr2, minPrice, maxPrice, (pageNo-1)*pageSize, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +164,7 @@ func GetPageBookByPrice(pageNo string, minPrice string, maxPrice string) (*model
 		Book:        books,
 		TotalPageNo: totalPageNo,
 		TotalRecord: totalRecord,
-		PageNo:      iPageNo,
+		PageNo:      pageNo,
 		PageSize:    pageSize,
 	}
 	return page, nil
