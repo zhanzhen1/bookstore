@@ -33,7 +33,7 @@
 		<div>
 			<span>欢迎<span class="um_span">{{.Username}}</span>光临书城系统</span>
 			<a href="/getCartInfo">购物车</a>
-			<a href="/pages/manager/manager.html">后台管理</a>
+			<a href="/getManager">后台管理</a>
 			<a href="/logout">注销</a>&nbsp;&nbsp;
 			<a href="/index">返回</a>
 		</div>
@@ -50,7 +50,7 @@
 	<div id="main">
 		<div id="book">
 			<div class="book_cond">
-				<form action="/index" method="post">
+				<form action="/index" method="get">
 					价格：<input type="text" name="min"> 元 - <input type="text" name="max"> 元 <button>查询</button>
 				</form>
 			</div>

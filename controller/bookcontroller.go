@@ -266,6 +266,7 @@ func GetPageBookByPrice() (handlerFunc gin.HandlerFunc) {
 				ReturnErr(ctx, err)
 				return
 			}
+			fmt.Println("minPrice:", minPrice)
 		} else { //查询
 			page, err = dao.GetPageBookByPrice(pageNo, minPrice, maxPrice)
 			//获取图书
