@@ -79,7 +79,7 @@ func Logout() (handlerFunc gin.HandlerFunc) {
 			//将修改之后得cookie发送给浏览器
 		}
 		//去首页
-		GetPageBookByPrice()
+		context.HTML(http.StatusOK, "index.html", nil)
 	}
 }
 
@@ -93,10 +93,13 @@ func Register() (handlerFunc gin.HandlerFunc) {
 		repwd := context.PostForm("repwd")
 		email := context.PostForm("email")
 		//调用验证用户名和密码的方法
-		user, _ := dao.Register(username)
+		user, err := dao.Register(username)
+		if err != nil {
+			fmt.Println("Register() err", err)
+			return
+		}
 		fmt.Println("获取的user是", user)
-
-		if user != nil {
+		if user == nil {
 			//用户名存在
 			context.HTML(http.StatusOK, "regist.html", "用户名已存在")
 		} else {
@@ -118,20 +121,23 @@ func Register() (handlerFunc gin.HandlerFunc) {
 }
 
 // 获取username 判断用户名是否存在
-func CheckUserName(w http.ResponseWriter, r *http.Request) {
-	//获取用户名密码
-	username := r.PostFormValue("username")
-	//调用验证用户名和密码的方法
-	user, _ := dao.Register(username)
-	fmt.Println("获取的user是", user)
-	if user != nil {
-		//用户名存在
-		w.Write([]byte("用户名存在"))
-	} else {
-		//用户名可用
-		w.Write([]byte("用户名可用"))
+func CheckUserName() (handlerFunc gin.HandlerFunc) {
+	return func(context *gin.Context) {
+		//获取用户名密码
+		username := context.PostForm("username")
+		//调用验证用户名和密码的方法
+		user, _ := dao.Register(username)
+		fmt.Println("获取的user是", user)
+		if user != nil {
+			//用户名存在
+			context.Writer.Write([]byte("用户名存在"))
+		} else {
+			//用户名可用
+			context.Writer.Write([]byte("用户名可用"))
 
+		}
 	}
+
 }
 
 //原生go写的项目

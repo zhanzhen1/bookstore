@@ -80,6 +80,8 @@ func main() {
 	ginServer.GET("/updateCartItem", controller.UpdateCartItem())
 	//结账
 	ginServer.GET("/checkout", controller.Checkout())
+	////获取username 判断用户名是否存在
+	ginServer.POST("/CheckUserName", controller.CheckUserName())
 	ginServer.Run(":8080")
 
 	//处理静态资源

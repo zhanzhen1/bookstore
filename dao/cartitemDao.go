@@ -29,11 +29,11 @@ func GetCartItemByBookIDAndCartID(bookID string, cartID string) (*model.CartItem
 		return nil, err
 	}
 	//根据bookId查询图书信息
-	book, err := GetBookByID(bookID)
+	//book, err := GetBookByID(bookID)
 	if err != nil {
 		return nil, err
 	}
-	cartItem.Book = book
+	//cartItem.Book = book
 	return cartItem, nil
 }
 
@@ -63,11 +63,11 @@ func GetCartItemByCartID(cartID string) ([]*model.CartItem, error) {
 			fmt.Println("Scan err", err)
 			return nil, nil
 		}
-		book, err := GetBookByID(bookID)
-		if err != nil {
-			return nil, err
-		}
-		cartItem.Book = book
+		//book, err := GetBookByID(bookID)
+		//if err != nil {
+		//	return nil, err
+		//}
+		//cartItem.Book = book
 		cartItems = append(cartItems, cartItem)
 	}
 	return cartItems, nil

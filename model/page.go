@@ -3,10 +3,10 @@ package model
 // 分页
 type Page struct {
 	Book        []*Book
-	PageNo      int64 //当前页
-	PageSize    int64 //每页显示几条
-	TotalPageNo int64 //总页数
-	TotalRecord int64
+	PageNo      int //当前页
+	PageSize    int //每页显示几条
+	TotalPageNo int //总页数
+	TotalRecord int
 	MinPrice    string
 	MaxPrice    string
 	IsLogin     bool
@@ -24,7 +24,7 @@ func (p *Page) IsHasNext() bool {
 }
 
 // 获取上一页数据
-func (p *Page) GetPrevPageNo() int64 {
+func (p *Page) GetPrevPageNo() int {
 	if p.IsHasPrev() {
 		return p.PageNo - 1
 	} else {
@@ -33,7 +33,7 @@ func (p *Page) GetPrevPageNo() int64 {
 }
 
 // 获取下一页
-func (p *Page) GetNextPageNo() int64 {
+func (p *Page) GetNextPageNo() int {
 	if p.IsHasNext() {
 		return p.PageNo + 1
 	} else {

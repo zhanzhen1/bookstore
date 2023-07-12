@@ -14,11 +14,11 @@ func ReturnErr(ctx *gin.Context, err error) {
 }
 
 // GetPageNo 从请求中获取当前所在页
-func GetPageNo(ctx *gin.Context) int64 {
+func GetPageNo(ctx *gin.Context) int {
 	//转换成int64
-	i, _ := strconv.ParseInt(ctx.Query("pageNo"), 10, 64)
+	i, _ := strconv.ParseInt(ctx.Query("pageNo"), 10, 32)
 	if i <= 0 {
 		return 1
 	}
-	return i
+	return int(i)
 }

@@ -9,4 +9,5 @@ type Book struct {
 	Sales   int
 	Stock   int
 	ImgPath string
+	Count   int
 }
