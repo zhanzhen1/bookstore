@@ -41,7 +41,7 @@
 				<td>{{.Price}}</td>
 				<td>{{.Sales}}</td>
 				<td>{{.Stock}}</td>
-				<td><a href="/updateByIDToAddBook?bookId={{.ID}}">修改</a></td>
+				<td><a href="/updateByID?bookId={{.ID}}">修改</a></td>
 				<td><a id="{{.Title}}" class="deletebook" href="/deleteBook?bookId={{.ID}}">删除</a></td>
 			</tr>
 			{{end}}
@@ -52,7 +52,7 @@
 				<td></td>
 				<td></td>
 				<td></td>
-				<td><a  href="/updateByIDToAddBook">添加图书</a></td>
+				<td><a  href="/addBookById">添加图书</a></td>
 			</tr>
 		</table>
 		<div id="page_nav">

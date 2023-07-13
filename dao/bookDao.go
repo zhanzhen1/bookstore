@@ -4,7 +4,11 @@ import (
 	"bookstore/model"
 	"bookstore/utils"
 	"fmt"
+	"log"
 )
+
+var book *model.Book
+var bookList []*model.Book
 
 // gorm 获取所有图书
 func GetBook() ([]*model.Book, error) {
@@ -45,17 +49,30 @@ func GetBookByID(id string) (*model.Book, error) {
 		fmt.Println("GetBookByID() err", err)
 		return nil, err
 	}
-	return book, nil
+	return book, err
 }
 
 // 新增图书
 
 func AddBook(book *model.Book) error {
-	sqlStr := "insert into book (title,author,price,sales,stock,img_path) values (?,?,?,?,?,?)"
-	_, err := utils.DB.Exec(sqlStr, book.Title, book.Author, &book.Price, book.Sales, book.Stock, book.ImgPath)
+	//sqlStr := "insert into book (title,author,price,sales,stock,img_path) values (?,?,?,?,?,?)"
+	//_, err := utils.DB.Exec(sqlStr, book.Title, book.Author, &book.Price, book.Sales, book.Stock, book.ImgPath)
+	//if err != nil {
+	//	fmt.Println("exec err", err)
+	//	return nil
+	//}
+	book = &model.Book{
+		Title:   book.Title,
+		Author:  book.Author,
+		Price:   book.Price,
+		Sales:   book.Sales,
+		Stock:   book.Stock,
+		ImgPath: book.ImgPath,
+	}
+	err := utils.Db1.Select("title", "author", "price", "sales", "stock", "img_path").Create(&book).Error
 	if err != nil {
-		fmt.Println("exec err", err)
-		return nil
+		utils.Db1.Rollback()
+		log.Fatal("AddBook() err:", err)
 	}
 	return err
 }
@@ -63,11 +80,16 @@ func AddBook(book *model.Book) error {
 // 根据图书id删除
 
 func DeleteBook(id string) error {
-	sqlStr := "DELETE FROM book WHERE id = ?"
-	_, err := utils.DB.Exec(sqlStr, id)
-	if err != nil {
-		fmt.Println("删除失败 err", err)
-		return err
+	//sqlStr := "DELETE FROM book WHERE id = ?"
+	//_, err := utils.DB.Exec(sqlStr, id)
+	//if err != nil {
+	//	fmt.Println("删除失败 err", err)
+	//	return err
+	//}
+	var err error
+	if err = utils.Db1.Delete(&book, id).Error; err != nil {
+		utils.Db1.Rollback()
+		log.Fatal("delete() err", err)
 	}
 	return err
 }
@@ -75,41 +97,57 @@ func DeleteBook(id string) error {
 // 根据id更新图书内容
 
 func UpdateByIdBook(id string) (*model.Book, error) {
-	sqlStr := "select *  FROM book WHERE id = ?"
-	row := utils.DB.QueryRow(sqlStr, id)
-	book := &model.Book{}
-	row.Scan(
-		&book.ID,
-		&book.Title,
-		&book.Author,
-		&book.Price,
-		&book.Sales,
-		&book.Stock,
-		&book.ImgPath,
-	)
-	return book, nil
+	//sqlStr := "select *  FROM book WHERE id = ?"
+	//row := utils.DB.QueryRow(sqlStr, id)
+	if err := utils.Db1.Model(&model.Book{}).Where("(id = ?)", id).Find(&bookList).
+		Scan(&book).Error; err != nil {
+		log.Fatal("UpdateByIdBook() err", err)
+	}
+	return book, err
+}
+func AddByIdBook(id string) (*model.Book, error) {
+	//sqlStr := "select *  FROM book WHERE id = ?"
+	//row := utils.DB.QueryRow(sqlStr, id)
+	if err := utils.Db1.Model(&model.Book{}).Where("(id = ?)", id).Find(&bookList).
+		Scan(&book).Error; err != nil {
+		log.Fatal("AddByIdBook() err", err)
+	}
+	return book, err
 }
 
 // 更新图书
+var err error
 
-func UpdateBook(book *model.Book) error {
-	sqlStr := "UPDATE book  SET title = ?,author = ? ,price= ? ,sales = ? ,stock = ?  where id = ?"
-
-	_, err := utils.DB.Exec(sqlStr, book.Title, book.Author, book.Price, book.Sales, book.Stock, book.ID)
-	if err != nil {
-		return err
+func UpdateBook(books *model.Book) error {
+	//sqlStr := "UPDATE book  SET title = ?,author = ? ,price= ? ,sales = ? ,stock = ?  where id = ?"
+	//
+	//_, err := utils.DB.Exec(sqlStr, book.Title, book.Author, book.Price, book.Sales, book.Stock, book.ID)
+	//if err != nil {
+	//	return err
+	//}
+	if err := utils.Db1.Model(&model.Book{}).Find(&book).Where("id = ?", books.ID).
+		Updates(&model.Book{
+			Title:   books.Title,
+			Author:  books.Author,
+			Price:   books.Price,
+			Sales:   books.Sales,
+			Stock:   books.Stock,
+			ImgPath: books.ImgPath,
+		}).Error; err != nil {
+		log.Fatal("UpdateBook() err", err)
 	}
-	return nil
+	return err
 }
 
-var book *model.Book
-var bookList []*model.Book
-
-// 获取带分页的图书信息
+// grom 获取带分页的图书信息
 func GetPageBook(pageNo int) (*model.Page, error) {
 	//获取数据库图书的总数
 	var totalRecord int
-	utils.Db1.Model(&model.Book{}).Select("count(*) as count ").Find(&book).Scan(&totalRecord)
+	if err := utils.Db1.Select("count(*) as count ").Find(&bookList).Scan(&totalRecord).
+		Error; err != nil {
+		utils.Db1.Rollback()
+		log.Fatal("GetPageBook(),err", err)
+	}
 	//设置每页只显示4条记录
 	var pageSize int
 	pageSize = 4
@@ -142,11 +180,15 @@ func GetPageBook(pageNo int) (*model.Page, error) {
 	return page, nil
 }
 
-// 带价格查询
+// gorm 带价格查询
 func GetPageBookByPrice(pageNo int, minPrice string, maxPrice string) (*model.Page, error) {
 	//获取数据库图书的总数
 	var totalRecord int
-	utils.Db1.Model(&model.Book{}).Select("count(*) as count").Where("price between ? and ?", minPrice, maxPrice).Find(&book).Scan(&totalRecord)
+	if err := utils.Db1.Model(&model.Book{}).Select("count(*) as count").
+		Where("price between ? and ?", minPrice, maxPrice).
+		Find(&book).Scan(&totalRecord).Error; err != nil {
+		log.Fatal("GetPageBookByPrice() err", err)
+	}
 	//row.Scan(&totalRecord)
 	//设置每页只显示4条记录
 	var pageSize int

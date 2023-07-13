@@ -105,7 +105,6 @@ func GetCartInfo() (handlerFunc gin.HandlerFunc) {
 		fmt.Println("cart", cart)
 		if cart != nil {
 			//设置用户名
-			//cart.UserName = session.UserName
 			session.Cart = cart
 			//解析模板文件
 			//files, err := template.ParseFiles(wd + "/bookstore/view/pages/cart/cart.html")

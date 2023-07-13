@@ -61,7 +61,8 @@ func main() {
 	//注销
 	ginServer.GET("/logout", controller.Logout())
 	//根据id跳转新增图书页面or更新图书页面
-	ginServer.GET("/updateByIDToAddBook", controller.UpdateByIDToAddBook())
+	ginServer.GET("/updateByID", controller.UpdateByID())
+	ginServer.GET("/addBookById", controller.AddBookById())
 	//更新or新增图书
 	ginServer.POST("/updateOrAddBook", controller.UpdateOrAddBook())
 	//删除图书

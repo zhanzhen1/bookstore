@@ -72,6 +72,7 @@ func Logout() (handlerFunc gin.HandlerFunc) {
 			err := dao.DeleteSession(cookie)
 			if err != nil {
 				fmt.Println("DeleteSession() err", err)
+				ReturnErr(context, err)
 				return
 			}
 			//设置cookie失效  maxage=0 未设置 maxage<0 失效 maxage>0 存在
@@ -96,6 +97,7 @@ func Register() (handlerFunc gin.HandlerFunc) {
 		user, err := dao.Register(username)
 		if err != nil {
 			fmt.Println("Register() err", err)
+			ReturnErr(context, err)
 			return
 		}
 		fmt.Println("获取的user是", user)
@@ -112,6 +114,7 @@ func Register() (handlerFunc gin.HandlerFunc) {
 			err = dao.Adduser(username, password, email)
 			if err != nil {
 				fmt.Println("注册err", err)
+				ReturnErr(context, err)
 				return
 			}
 			fmt.Println("注册成功")
